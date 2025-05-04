@@ -1,7 +1,7 @@
 package dev.batist.EventMark.core.entities.enums;
 
 public enum Tipo {
-    Festa,
+    festa,
     seminário,
     show,
     competição,
