@@ -1,0 +1,2 @@
+ALTER TABLE eventos
+ADD COLUMN organizador VARCHAR(255);
