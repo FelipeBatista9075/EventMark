@@ -10,6 +10,8 @@ import dev.batist.EventMark.infrastructure.repository.EventoRespositoy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @Component
 public class EventoRepositoryGateway implements EventoGateway {
