@@ -33,7 +33,7 @@ jobs:
           path: target/*.jar
 
       - name: Config SSH and Deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-232-61-205.compute-1.amazonaws.com "cd /app && git pull && npm install && pm2 restart app"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+               - run: |
+                     ssh -o StrictHostKeyChecking=no ec2-user@ec2-54-82-95-179.compute-1.amazonaws.com "cd /app && git pull && npm install && pm2 restart app"
+               - env:
+               - SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
