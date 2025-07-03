@@ -32,18 +32,53 @@ jobs:
           name: myapp-jar
           path: target/*.jar
 
-      - name: Config SSH and Deploy
+      - name: Stop old process
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
+          
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
-              pm2 delete eventmark || true
-              pkill -f 'java -jar /home/ec2-user/EventMark.jar' || true
-              pm2 start --name eventmark -- java -jar /home/ec2-user/EventMark.jar
-              sleep 5
-              pm2 logs eventmark --lines 20
+            pm2 describe eventmark > /dev/null 2>&1 && pm2 delete eventmark
+          "
+
+      - name: Kill orphan Java processes
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
+            pkill -f 'java -jar /home/ec2-user/EventMark.jar' || true
+          "
+
+      - name: Deploy new version
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/EventMark-0.0.1-SNAPSHOT.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/EventMark.jar
+          
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
+            pm2 start --name eventmark -- java -jar /home/ec2-user/EventMark.jar
+          "
+
+      - name: Show PM2 logs
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
+            sleep 5
+            pm2 logs eventmark --lines 20
           "
