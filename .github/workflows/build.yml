@@ -23,20 +23,24 @@ jobs:
       - name: Run all tests
         run: mvn test
 
-      - name: Build Artifact
-        run: mvn clean package
-
       - name: Store Artifact
         uses: actions/upload-artifact@v4
         with:
           name: myapp-jar
           path: target/*.jar
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: myapp-jar
           path: target/
+
+      - name: List artifact files
+        run: ls -l target/
 
       - name: Create SSH key
         run: |
@@ -46,5 +50,5 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/myapp-*.jar ec2-user@${{ secrets.EC2_HOST }}:/app/myapp.jar
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/EventMark-0.0.1-SNAPSHOT.jar ec2-user@${{ secrets.EC2_HOST }}:/app/myapp.jar
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "sudo systemctl restart myapp-java-service"
