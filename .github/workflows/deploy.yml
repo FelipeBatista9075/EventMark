@@ -41,7 +41,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
-            pm2 delete eventmark || true
-            pkill -f 'java -jar /home/ec2-user/EventMark.jar' || true
-            pm2 start --name eventmark -- java -jar /home/ec2-user/EventMark.jar
+              pm2 delete eventmark || true
+              pkill -f 'java -jar /home/ec2-user/EventMark.jar' || true
+              pm2 start --name eventmark -- java -jar /home/ec2-user/EventMark.jar
+              sleep 5
+              pm2 logs eventmark --lines 20
           "
