@@ -1,50 +1,20 @@
-name: Build and deploy of EventMark v1
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: myapp-jar
+        path: target/
 
-on:
-  push:
-    branches: [master]
+    - name: Create SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Configure Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build Project
-        run: mvn clean install
-
-      - name: Run all tests
-        run: mvn test
-
-      - name: Build Artifact
-        run: mvn clean package
-
-      - name: Store Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: myapp-jar
-          path: target/*.jar
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: myapp-jar
-          path: target/
-
-      - name: Configurar SSH e Deploy
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/myapp-*.jar ec2-user@${{ secrets.EC2_HOST }}:/app/myapp.jar
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "sudo systemctl restart myapp-java-service"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/myapp-*.jar ec2-user@${{ secrets.EC2_HOST }}:/app/myapp.jar
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "sudo systemctl restart myapp-java-service"
