@@ -40,8 +40,8 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/EventMark-0.0.1-SNAPSHOT.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/EventMark.jar
-
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
             pm2 delete eventmark || true
-            pm2 start 'java -jar /home/ec2-user/EventMark.jar' --name eventmark"
+            pkill -f 'java -jar /home/ec2-user/EventMark.jar' || true
+            pm2 start --name eventmark -- java -jar /home/ec2-user/EventMark.jar
+          "
