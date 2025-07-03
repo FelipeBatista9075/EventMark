@@ -33,10 +33,7 @@ jobs:
           path: target/*.jar
 
       - name: Config SSH and Deploy
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "."
-          target: /home/${{ secrets.EC2_USERNAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "cd /app && git pull && npm install && pm2 restart app"Add commentMore actions
+        env:
+          SSH_PRIVATE_KEY: ${{ SSH_PRIVATE_KEY }}
