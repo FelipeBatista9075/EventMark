@@ -40,7 +40,11 @@ jobs:
 
       - name: Configurar SSH e Deploy
         run: |
-                scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/myapp-*.jar ec2-user@${{ secrets.EC2_USER }}:/app/myapp.jar
-                ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ec2-user@${{ secrets.EC2_USER }} "sudo systemctl restart myapp-java-service"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/myapp-*.jar ec2-user@${{ secrets.EC2_HOST }}:/app/myapp.jar
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "sudo systemctl restart myapp-java-service"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
