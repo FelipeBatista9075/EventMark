@@ -32,10 +32,15 @@ jobs:
           name: myapp-jar
           path: target/*.jar
 
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: myapp-jar
+          path: target/
+
       - name: Configurar SSH e Deploy
         run: |
-          actions/download-artifact@v4
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/myapp-*.jar ec2-user@${{ secrets.EC2_USER }}:/app/myapp.jar
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ec2-user@${{ secrets.EC2_USER }} "sudo systemctl restart myapp-java-service"
+                scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/myapp-*.jar ec2-user@${{ secrets.EC2_USER }}:/app/myapp.jar
+                ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ec2-user@${{ secrets.EC2_USER }} "sudo systemctl restart myapp-java-service"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
