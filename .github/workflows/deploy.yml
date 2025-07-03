@@ -33,11 +33,12 @@ jobs:
           path: target/*.jar
 
       - name: Config SSH and Deploy
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST}} \
-          "cd /app && git pull && npm install && pm2 restart app"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          scp -o StrictHostKeyChecking=no target/EventMark-0.0.1-SNAPSHOT.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/EventMark.jar
+
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "
+          pm2 delete eventmark || true
+          pm2 start 'java -jar /home/ec2-user/EventMark.jar' --name eventmark
+          "
