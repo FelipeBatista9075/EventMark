@@ -1,82 +1,132 @@
+---
 
-# EventMark
+# 📅 EventMark
 
-EventMark é uma aplicação Java para **criação e gerenciamento de eventos**, construída seguindo os princípios da **Arquitetura Limpa (Clean Architecture)**, com deploy configurado para servidores Linux via GitHub Actions.
-
-## ✨ Funcionalidades
-
-- Cadastro de eventos com:
-  - Nome, descrição, data e hora de início/fim
-  - Local, capacidade, organizador
-  - Tipo de evento
-- Identificador único para cada evento
-- Separação clara entre regras de negócio e infraestrutura
-- Pronta para integração com APIs, bancos de dados e UIs
-
-## 🏛️ Arquitetura
-
-A estrutura segue os princípios da **Arquitetura Limpa**, com separação em camadas bem definidas:
-
-```
-
-src/
-└── main/
-└── java/dev/batist/EventMark/
-├── core/
-│   ├── entities/        # Entidades do domínio (ex: Evento)
-│   ├── gateway/         # Interfaces para acesso externo (ex: persistência, API)
-│   └── usecase/         # Casos de uso (regras de negócio)
-└── infrastructure/
-├── config/          # Configurações do Spring Boot
-├── controller/      # Camada de entrada (ex: REST API)
-├── dtos/            # Objetos de transferência de dados
-├── exceptions/      # Exceções da aplicação
-├── gateway/         # Implementações das interfaces do core
-├── persistence/     # Entidades JPA, mapeamentos e adaptadores
-├── repository/      # Repositórios Spring Data
-└── Mapper/          # Mapeamento entre entidades e DTOs
-
-````
-
-### 📦 Entidade principal
-
-```
-public record Evento(
-    Long id,
-    String nome,
-    String descricao,
-    LocalDateTime inicio,
-    LocalDateTime fim,
-    String identificador,
-    String organizador,
-    String local,
-    Integer capacidade,
-    Tipo tipoEvento
-) {}
-````
+**EventMark** é uma aplicação para gerenciamento de eventos, construída em **Java com Spring Boot**, seguindo princípios de arquitetura limpa e boas práticas de desenvolvimento.
+O sistema permite **criar, listar, buscar e deletar eventos**, com suporte a diferentes **tipos de evento** (seminários, shows, feiras, etc.).
 
 ---
 
-## 🚀 Deploy
+## 🚀 Tecnologias Utilizadas
 
-O deploy é realizado via **GitHub Actions** para uma instância EC2 da AWS.
+* **Java 17+**
+* **Spring Boot**
+* **Spring Data JPA**
+* **Lombok**
+* **Docker & Docker Compose**
+* **Maven**
 
-### Exemplo de etapa de deploy:
+---
+
+## 📂 Estrutura do Projeto
 
 ```
-yaml
-- name: Deploy to EC2
-  run: |
-    scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa target/eventmark-*.jar ec2-user@${{ secrets.EC2_HOST }}:/app/eventmark.jar
-    ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "sudo systemctl restart eventmark-service"
+src/main/java/dev/batist/EventMark
+│── core
+│   ├── entities (entidades de domínio)
+│   │   └── enums (ex: Tipo.java)
+│   ├── gateway (interfaces de persistência)
+│   └── usecase (casos de uso: criar, buscar, atualizar, deletar eventos)
+│
+│── infrastructure
+│   ├── config (configurações do projeto)
+│   ├── controller (exposição via REST API)
+│   ├── dtos (objetos de transferência de dados)
+│   ├── exceptions (tratamento de exceções personalizadas)
+│   ├── gateway (implementação dos repositórios)
+│   ├── persistence (entidades JPA e mapeamentos)
+│   └── repository (interfaces de repositórios Spring Data)
+│
+│── resources (arquivos de configuração)
+│── EventMarkApplication.java (classe principal)
 ```
 
-## 🔧 Tecnologias
+---
 
-* Java 17
-* Spring Boot
-* Maven
-* GitHub Actions
-* AWS EC2
-* Arquitetura Limpa
-* 
+## 🗄️ Modelagem da Entidade
+
+### **EventosEntity.java**
+
+* `id` (Long) → Identificador único
+* `nome` (String) → Nome do evento
+* `descricao` (String) → Descrição do evento
+* `inicio` / `fim` (LocalDateTime) → Período do evento
+* `identificador` (String) → Código único
+* `organizador` (String) → Responsável pelo evento
+* `local` (String) → Local onde ocorrerá
+* `capacidade` (Integer) → Número máximo de participantes
+* `tipoEvento` (Enum) → Tipo (show, seminário, feira, networking...)
+
+---
+
+## 🌐 Endpoints da API
+
+Base URL: `/api/v1/`
+
+| Método     | Endpoint       | Descrição                        |
+| ---------- | -------------- | -------------------------------- |
+| **POST**   | `/criarevento` | Criar um novo evento             |
+| **GET**    | `/listar`      | Listar todos os eventos          |
+| **GET**    | `/{id}`        | Buscar evento pelo identificador |
+| **DELETE** | `/{id}`        | Deletar evento pelo ID           |
+
+---
+
+## ▶️ Como Rodar o Projeto
+
+### Pré-requisitos
+
+* **Java 17+**
+* **Maven**
+* **Docker** (opcional para rodar em container)
+
+### Rodando localmente
+
+```bash
+# Clone o repositório
+git clone https://github.com/SEU_USUARIO/EventMark.git
+cd EventMark
+
+# Compile o projeto
+mvn clean install
+
+# Execute a aplicação
+mvn spring-boot:run
+```
+
+A aplicação estará disponível em:
+👉 `http://localhost:8080/api/v1`
+
+### Rodando com Docker
+
+```bash
+# Build do container
+docker-compose up --build
+```
+
+---
+
+## ⚠️ Tratamento de Erros
+
+O sistema possui **exceções personalizadas**:
+
+* `EventoDuplicadoException` → Quando já existe evento com o mesmo identificador.
+* `EventoNaoEncontrado` → Quando um evento não é localizado.
+* `RestExceptionHandler` → Handler global para formatar erros.
+
+---
+
+## 📌 Futuras Melhorias
+
+* Autenticação e autorização (JWT).
+* Integração com banco relacional (MySQL/Postgres).
+* Testes unitários e de integração.
+* Documentação com Swagger/OpenAPI.
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido por **Felipe Batista** 👾
+
+---
