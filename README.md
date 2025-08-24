@@ -37,7 +37,6 @@ src/main/java/dev/batist/EventMark
 │   ├── persistence (entidades JPA e mapeamentos)
 │   └── repository (interfaces de repositórios Spring Data)
 │
-│── resources (arquivos de configuração)
 │── EventMarkApplication.java (classe principal)
 ```
 
@@ -84,7 +83,7 @@ Base URL: `/api/v1/`
 
 ```bash
 # Clone o repositório
-git clone https://github.com/SEU_USUARIO/EventMark.git
+git clone https://github.com/FelipeBatista9075/EventMark.git
 cd EventMark
 
 # Compile o projeto
